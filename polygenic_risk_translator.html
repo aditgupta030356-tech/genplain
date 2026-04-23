@@ -1,0 +1,276 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #F7F5F0;
+    --surface: #FFFFFF;
+    --accent: #1B4332;
+    --accent-light: #D8F3DC;
+    --accent-mid: #52B788;
+    --text: #1A1A1A;
+    --muted: #6B7280;
+    --border: #E5E1D8;
+    --danger: #9B2335;
+    --danger-light: #FEE2E2;
+    --warning: #92400E;
+    --warning-light: #FEF3C7;
+    --safe: #1B4332;
+    --safe-light: #D8F3DC;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  .hero { text-align: center; padding: 3rem 1.5rem 2rem; }
+  .hero-label { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent-mid); font-weight: 500; margin-bottom: 1rem; }
+  .hero h1 { font-family: 'Instrument Serif', serif; font-size: 2.8rem; color: var(--text); line-height: 1.1; margin-bottom: 0.75rem; }
+  .hero h1 em { font-style: italic; color: var(--accent); }
+  .hero p { font-size: 15px; color: var(--muted); max-width: 480px; margin: 0 auto; line-height: 1.6; }
+  .main { max-width: 680px; margin: 0 auto; padding: 0 1.25rem 4rem; }
+  .input-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.25rem; }
+  .input-label { font-size: 12px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.75rem; display: block; }
+  textarea { width: 100%; border: 1px solid var(--border); border-radius: 10px; padding: 0.875rem 1rem; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text); background: var(--bg); resize: vertical; min-height: 130px; outline: none; transition: border-color 0.2s; line-height: 1.6; }
+  textarea:focus { border-color: var(--accent-mid); }
+  textarea::placeholder { color: #B0AAA0; }
+  .conditions-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
+  .cond-btn { border: 1px solid var(--border); border-radius: 8px; padding: 0.6rem 0.75rem; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--muted); background: var(--bg); cursor: pointer; transition: all 0.15s; text-align: left; display: flex; align-items: center; gap: 8px; }
+  .cond-btn.active { border-color: var(--accent); background: var(--accent-light); color: var(--accent); }
+  .cond-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); flex-shrink: 0; transition: background 0.15s; }
+  .cond-btn.active .cond-dot { background: var(--accent); }
+  .analyze-btn { width: 100%; padding: 1rem; background: var(--accent); color: #fff; border: none; border-radius: 12px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; cursor: pointer; transition: opacity 0.2s, transform 0.1s; letter-spacing: 0.01em; margin-top: 1rem; }
+  .analyze-btn:hover { opacity: 0.9; }
+  .analyze-btn:active { transform: scale(0.99); }
+  .analyze-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .disclaimer { font-size: 11px; color: var(--muted); text-align: center; margin-top: 0.75rem; line-height: 1.5; }
+  .results { margin-top: 1.5rem; display: none; }
+  .results.visible { display: block; }
+  .result-header { font-family: 'Instrument Serif', serif; font-size: 1.6rem; color: var(--text); margin-bottom: 0.25rem; }
+  .result-sub { font-size: 13px; color: var(--muted); margin-bottom: 1.5rem; }
+  .risk-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .risk-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+  .risk-condition { font-size: 16px; font-weight: 500; color: var(--text); }
+  .risk-badge { font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 20px; }
+  .badge-high { background: var(--danger-light); color: var(--danger); }
+  .badge-moderate { background: var(--warning-light); color: var(--warning); }
+  .badge-low { background: var(--safe-light); color: var(--safe); }
+  .risk-section { margin-bottom: 0.875rem; }
+  .risk-section-label { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 0.35rem; }
+  .risk-section-text { font-size: 14px; color: var(--text); line-height: 1.65; }
+  .risk-bar-wrap { height: 6px; background: var(--bg); border-radius: 4px; margin: 0.5rem 0; overflow: hidden; }
+  .risk-bar { height: 100%; border-radius: 4px; transition: width 0.8s ease; }
+  .bar-high { background: var(--danger); }
+  .bar-moderate { background: #F59E0B; }
+  .bar-low { background: var(--accent-mid); }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 0.875rem 0; }
+  .doctor-card { background: var(--accent); color: #fff; border-radius: 14px; padding: 1.5rem; margin-top: 1.5rem; }
+  .doctor-card-label { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.7; margin-bottom: 0.5rem; }
+  .doctor-card-title { font-family: 'Instrument Serif', serif; font-size: 1.3rem; margin-bottom: 0.75rem; }
+  .doctor-card-body { font-size: 13px; line-height: 1.7; opacity: 0.9; white-space: pre-wrap; }
+  .loading-state { text-align: center; padding: 2.5rem; }
+  .spinner { width: 32px; height: 32px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1rem; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-size: 14px; color: var(--muted); }
+  .sample-btn { font-size: 12px; color: var(--accent-mid); background: none; border: none; cursor: pointer; text-decoration: underline; font-family: 'DM Sans', sans-serif; margin-top: 0.5rem; }
+  .error-msg { background: var(--danger-light); color: var(--danger); border-radius: 10px; padding: 0.875rem 1rem; font-size: 13px; margin-top: 1rem; display: none; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <p class="hero-label">Precision Medicine Tool</p>
+  <h1>Understand your<br><em>genetic risk</em></h1>
+  <p>Paste your genetic report data and get a plain-language breakdown of what your polygenic risk scores actually mean — and what to discuss with your doctor.</p>
+</div>
+
+<div class="main">
+  <div class="input-card">
+    <label class="input-label">Your genetic report data</label>
+    <textarea id="genetic-input" placeholder="Paste your 23andMe, AncestryDNA, or lab report data here...&#10;&#10;Example: PRS for Type 2 Diabetes: 1.8x average risk. Variants detected: rs7903146 (TCF7L2), rs1801282 (PPARG)..."></textarea>
+    <button class="sample-btn" onclick="loadSample()">Load sample data →</button>
+  </div>
+
+  <div class="input-card">
+    <label class="input-label">Conditions to explain</label>
+    <div class="conditions-grid" id="conditions-grid">
+      <button class="cond-btn active" data-cond="Type 2 Diabetes"><span class="cond-dot"></span>Type 2 Diabetes</button>
+      <button class="cond-btn active" data-cond="Heart Disease"><span class="cond-dot"></span>Heart Disease</button>
+      <button class="cond-btn" data-cond="Alzheimer's Disease"><span class="cond-dot"></span>Alzheimer's</button>
+      <button class="cond-btn" data-cond="Breast Cancer"><span class="cond-dot"></span>Breast Cancer</button>
+      <button class="cond-btn" data-cond="Prostate Cancer"><span class="cond-dot"></span>Prostate Cancer</button>
+      <button class="cond-btn" data-cond="Atrial Fibrillation"><span class="cond-dot"></span>Atrial Fibrillation</button>
+    </div>
+  </div>
+
+  <button class="analyze-btn" id="analyze-btn" onclick="analyze()">Analyze my genetic data</button>
+  <p class="disclaimer">Not a medical diagnosis. Always consult a licensed physician or genetic counselor.</p>
+  <div class="error-msg" id="error-msg"></div>
+
+  <div class="results" id="results">
+    <div class="loading-state" id="loading-state">
+      <div class="spinner"></div>
+      <p class="loading-text">Interpreting your genetic data...</p>
+    </div>
+    <div id="results-content" style="display:none;"></div>
+  </div>
+</div>
+
+<script>
+const SAMPLE_DATA = `Polygenic Risk Score Summary Report
+
+Type 2 Diabetes: PRS = 1.9x population average
+Key variants: rs7903146 (TCF7L2) - risk allele present, rs1801282 (PPARG) - protective allele absent
+Percentile: 78th
+
+Coronary Heart Disease: PRS = 0.7x population average  
+Key variants: rs1333049 (9p21) - no risk allele, rs46522 (LDLR) - heterozygous
+Percentile: 31st
+
+LDL Cholesterol genetic predisposition: Moderately elevated
+HDL Cholesterol genetic predisposition: Average`;
+
+function loadSample() {
+  document.getElementById('genetic-input').value = SAMPLE_DATA;
+}
+
+document.querySelectorAll('.cond-btn').forEach(btn => {
+  btn.addEventListener('click', () => btn.classList.toggle('active'));
+});
+
+function getSelectedConditions() {
+  return [...document.querySelectorAll('.cond-btn.active')].map(b => b.dataset.cond);
+}
+
+function getRiskLevel(text) {
+  const t = text.toLowerCase();
+  if (t.includes('high') || t.includes('elevated') || t.includes('increased')) return 'high';
+  if (t.includes('moderate') || t.includes('slightly')) return 'moderate';
+  return 'low';
+}
+
+function getRiskBarWidth(level) {
+  return level === 'high' ? '78%' : level === 'moderate' ? '48%' : '22%';
+}
+
+async function analyze() {
+  const input = document.getElementById('genetic-input').value.trim();
+  const conditions = getSelectedConditions();
+  const errEl = document.getElementById('error-msg');
+  errEl.style.display = 'none';
+
+  if (!input) { errEl.textContent = 'Please paste your genetic report data above.'; errEl.style.display = 'block'; return; }
+  if (!conditions.length) { errEl.textContent = 'Please select at least one condition to explain.'; errEl.style.display = 'block'; return; }
+
+  document.getElementById('analyze-btn').disabled = true;
+  const resultsEl = document.getElementById('results');
+  resultsEl.className = 'results visible';
+  document.getElementById('loading-state').style.display = 'block';
+  document.getElementById('results-content').style.display = 'none';
+
+  const prompt = `You are a genetic counselor AI assistant. A patient has shared their genetic report data. Analyze it and provide plain-language explanations.
+
+Genetic report data:
+${input}
+
+Conditions to focus on: ${conditions.join(', ')}
+
+Respond ONLY with a JSON object (no markdown, no backticks) in this exact format:
+{
+  "conditions": [
+    {
+      "name": "condition name",
+      "risk_level": "high|moderate|low",
+      "plain_summary": "2-3 sentence plain English explanation of what their risk means",
+      "population_context": "How this compares to average population risk in concrete terms e.g. X in 100 people",
+      "key_variants": "Brief mention of notable genetic variants found if present in report",
+      "lifestyle_modifiers": "2-3 specific lifestyle factors that can modify this genetic risk"
+    }
+  ],
+  "doctor_summary": "A 3-4 sentence summary the patient can bring to their doctor. Include the most important findings and suggested questions to ask.",
+  "overall_note": "One sentence reassurance about what genetic risk scores do and don't mean"
+}
+
+Only include conditions that are relevant to the data provided or can be reasonably inferred. Be accurate, warm, and non-alarmist.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await res.json();
+    const text = data.content?.[0]?.text || '';
+    const clean = text.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+    renderResults(parsed);
+  } catch(e) {
+    document.getElementById('loading-state').style.display = 'none';
+    errEl.textContent = 'Something went wrong analyzing your data. Please try again.';
+    errEl.style.display = 'block';
+    document.getElementById('analyze-btn').disabled = false;
+  }
+}
+
+function renderResults(data) {
+  document.getElementById('loading-state').style.display = 'none';
+  const content = document.getElementById('results-content');
+  content.style.display = 'block';
+
+  let html = `<p class="result-header">Your genetic risk breakdown</p>
+  <p class="result-sub">${data.overall_note || ''}</p>`;
+
+  (data.conditions || []).forEach(c => {
+    const level = c.risk_level || getRiskLevel(c.plain_summary);
+    const barW = getRiskBarWidth(level);
+    const badgeClass = level === 'high' ? 'badge-high' : level === 'moderate' ? 'badge-moderate' : 'badge-low';
+    const barClass = level === 'high' ? 'bar-high' : level === 'moderate' ? 'bar-moderate' : 'bar-low';
+    const badgeText = level.charAt(0).toUpperCase() + level.slice(1) + ' risk';
+
+    html += `<div class="risk-card">
+      <div class="risk-card-top">
+        <span class="risk-condition">${c.name}</span>
+        <span class="risk-badge ${badgeClass}">${badgeText}</span>
+      </div>
+      <div class="risk-bar-wrap"><div class="risk-bar ${barClass}" style="width:${barW}"></div></div>
+      <div class="risk-section">
+        <p class="risk-section-label">What this means</p>
+        <p class="risk-section-text">${c.plain_summary}</p>
+      </div>
+      <hr class="divider">
+      <div class="risk-section">
+        <p class="risk-section-label">Population context</p>
+        <p class="risk-section-text">${c.population_context}</p>
+      </div>`;
+
+    if (c.key_variants) {
+      html += `<hr class="divider"><div class="risk-section">
+        <p class="risk-section-label">Key variants</p>
+        <p class="risk-section-text">${c.key_variants}</p>
+      </div>`;
+    }
+
+    html += `<hr class="divider"><div class="risk-section">
+        <p class="risk-section-label">What you can do</p>
+        <p class="risk-section-text">${c.lifestyle_modifiers}</p>
+      </div>
+    </div>`;
+  });
+
+  if (data.doctor_summary) {
+    html += `<div class="doctor-card">
+      <p class="doctor-card-label">For your doctor</p>
+      <p class="doctor-card-title">Bring this to your next appointment</p>
+      <p class="doctor-card-body">${data.doctor_summary}</p>
+    </div>`;
+  }
+
+  content.innerHTML = html;
+  document.getElementById('analyze-btn').disabled = false;
+}
+</script>
+</body>
